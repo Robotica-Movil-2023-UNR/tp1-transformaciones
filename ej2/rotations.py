@@ -1,9 +1,9 @@
 import numpy as np
 
 # Definición de los ángulos de rotación
-roll_angle = np.radians(np.pi*4/7)
-pitch_angle = np.radians(np.pi/2)
-yaw_angle = np.radians(-np.pi/3)
+roll_angle = np.pi*4/7
+pitch_angle = np.pi/2
+yaw_angle = -np.pi/3
 
 # Función que obtiene la matriz de rotación
 def get_rotation_matrix(axis, angle):
@@ -31,10 +31,7 @@ Rz = get_rotation_matrix('z', yaw_angle)
 print("Imprime matrices de rotación:")
 print("Rx:",Rx)
 print("Ry:",Ry)
-print("Rx:",Rz)
-r12 = np.matmul(Ry, Rx)
-print("Imprime Ry*Rx:")
-print("R12:",r12)
+print("Rz:",Rz)
+rotation_matrix = np.matmul(Rz, np.matmul(Ry, Rx))
 print("Imprime Rz*Ry*Rx:")
-r23 = np.matmul(Rz, r12)
-print("R23:",r23)
+print("R:",rotation_matrix)
