@@ -41,6 +41,7 @@ def transform_pose(pose, transformation_matrix):
 def main():
     ground_truth_path = "./MH_01_easy/mav0/state_groundtruth_estimate0/data.csv"
     ground_truth_trajectory = []
+    ground_truth_trajectory_transformed = []
 
     # Punto a
     ## Parsear los datos de entrada. Solo primero 8 columnas
@@ -51,19 +52,23 @@ def main():
             print(first_row[0:8])
             for row in csv_reader:
                 pose = np.array(row[0:8]).astype(float)
+
+                ## TODO: Acá hay un error en la transformación
                 pose_in_camera = transform_pose(pose, T_BS)
-                ground_truth_trajectory.append(pose_in_camera)
+
+                ground_truth_trajectory_transformed.append(pose_in_camera)
+                ground_truth_trajectory.append(pose)
     except FileNotFoundError:
         print("File not found.")
     except Exception as e:
         print("An error occurred:", e)
 
-    print("Filas: ", len(ground_truth_trajectory))
+    print("Filas: ", len(ground_truth_trajectory_transformed))
 
     # Punto b
     ## Convertir a segundos y transformar coordenadas
     ground_truth_trajectory_seconds = []
-    for row in ground_truth_trajectory:
+    for row in ground_truth_trajectory_transformed:
         timestamp_seconds = np.array([row[0] / 1e9])
         new_row = np.hstack((timestamp_seconds, row[1:]))
         ground_truth_trajectory_seconds.append(new_row)
@@ -79,19 +84,21 @@ def main():
                 break
 
     print("Camino transformado:")
-    print(ground_truth_trajectory[:5])
+    print(ground_truth_trajectory_transformed[:5])
     print("Camino transformado y en segundos:")
     print(ground_truth_trajectory_seconds[:5])
 
     # Punto c
     # Busco solo las poses 3D
-    positions = np.array([pose[1:4] for pose in ground_truth_trajectory_seconds])
+    positions_original = np.array([pose[1:4] for pose in ground_truth_trajectory])
+    positions_transformed = np.array([pose[1:4] for pose in ground_truth_trajectory_seconds])
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
     # Plot the trajectory
-    ax.plot(positions[:, 0], positions[:, 1], positions[:, 2])
+    ax.plot(positions_transformed[:, 0], positions_transformed[:, 1], positions_transformed[:, 2])
+    ax.plot(positions_original[:, 0], positions_original[:, 1], positions_original[:, 2])
 
     # Set labels and title
     ax.set_xlabel('X')
