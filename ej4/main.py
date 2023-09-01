@@ -10,6 +10,32 @@ T_BS = np.array([0.0148655429818, -0.999880929698, 0.00414029679422, -0.02164014
     -0.0257744366974, 0.00375618835797, 0.999660727178, 0.00981073058949,
     0.0, 0.0, 0.0, 1.0]).reshape(4,4)
 
+T_BS_unit = np.array([
+    [1, 0, 0, -0.0216401454975],
+    [0, 1, 0, -0.064676986768],
+    [0, 0, 1, 0.00981073058949],
+    [0, 0, 0, 1]
+])
+
+# De chatgpt
+def apply_transformation(pose, transformation_matrix):
+    timestamp, x, y, z, qw, qx, qy, qz = pose
+
+    # Convert quaternion to rotation matrix
+    rotation = R.from_quat([qx, qy, qz, qw])
+    rotation_matrix = rotation.as_matrix()
+
+    # Apply the transformation to the translation component
+    new_translation = np.dot(transformation_matrix[:3, :3],
+            np.array([x, y, z])) + transformation_matrix[:3, 3]
+
+    # Apply the transformation to the rotation component
+    new_rotation_matrix = np.dot(transformation_matrix[:3, :3], rotation_matrix)
+    new_rotation = R.from_matrix(new_rotation_matrix)
+    new_quaternion = new_rotation.as_quat()
+
+    return np.array([timestamp, new_translation[0], new_translation[1], new_translation[2], new_quaternion[3], new_quaternion[0], new_quaternion[1], new_quaternion[2]])
+
 def transform_pose(pose, transformation_matrix):
     timestamp, x, y, z, qw, qx, qy, qz = pose
 
@@ -54,7 +80,8 @@ def main():
             for row in csv_reader:
                 pose = np.array(row[0:8]).astype(float)
 
-                pose_in_camera = transform_pose(pose, T_BS)
+                #  pose_in_camera = transform_pose(pose, T_BS_unit)
+                pose_in_camera = apply_transformation(pose, T_BS_unit)
 
                 ground_truth_trajectory_transformed.append(pose_in_camera)
                 ground_truth_trajectory.append(pose)
@@ -97,14 +124,19 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
 
     # Plot the trajectory
-    ax.plot(positions_transformed[:, 0], positions_transformed[:, 1], positions_transformed[:, 2])
-    ax.plot(positions_original[:, 0], positions_original[:, 1], positions_original[:, 2])
+    ax.plot(positions_transformed[:, 0],
+            positions_transformed[:, 1],
+            positions_transformed[:, 2],label='cam0')
+    ax.plot(positions_original[:, 0],
+            positions_original[:, 1],
+            positions_original[:, 2],label='imu')
 
     # Set labels and title
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.set_title('3D Trajectory')
+    ax.legend()
 
     # Show the plot
     plt.show()
