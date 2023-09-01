@@ -30,13 +30,14 @@ def transform_pose(pose, transformation_matrix):
     transformed_quaternion = R.from_matrix(transformed_rotation_matrix).as_quat()
 
     # Nota: El quaternion original viene en formato qw,qx,qy,qz
-    return np.array([ transformed_position[0],
-                  transformed_position[1],
-                  transformed_position[2],
-                  transformed_quaternion[3],
-                  transformed_quaternion[0],
-                  transformed_quaternion[1],
-                  transformed_quaternion[2]])
+    return np.array([ timestamp,
+                    transformed_position[0],
+                    transformed_position[1],
+                    transformed_position[2],
+                    transformed_quaternion[3],
+                    transformed_quaternion[0],
+                    transformed_quaternion[1],
+                    transformed_quaternion[2]])
 
 def main():
     ground_truth_path = "./MH_01_easy/mav0/state_groundtruth_estimate0/data.csv"
@@ -53,7 +54,6 @@ def main():
             for row in csv_reader:
                 pose = np.array(row[0:8]).astype(float)
 
-                ## TODO: Acá hay un error en la transformación
                 pose_in_camera = transform_pose(pose, T_BS)
 
                 ground_truth_trajectory_transformed.append(pose_in_camera)
