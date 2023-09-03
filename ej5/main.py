@@ -2,7 +2,6 @@ import csv
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 # Matrix de transformación imu->cámara
 T_BS = np.array([0.0148655429818, -0.999880929698, 0.00414029679422, -0.0216401454975,
@@ -10,6 +9,7 @@ T_BS = np.array([0.0148655429818, -0.999880929698, 0.00414029679422, -0.02164014
     -0.0257744366974, 0.00375618835797, 0.999660727178, 0.00981073058949,
     0.0, 0.0, 0.0, 1.0]).reshape(4,4)
 
+# Matrix de transformación imu->cámara
 T_BS_unit = np.array([
     [1, 0, 0, -0.0216401454975],
     [0, 1, 0, -0.064676986768],
